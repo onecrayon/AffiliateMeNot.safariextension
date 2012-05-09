@@ -38,6 +38,8 @@
 			<string>All</string>
 		</dict>
 	</dict>
+	<key>Update Manifest URL</key>
+	<string>http://onecrayon.com/safariextensions-updates.plist</string>
 	<key>Website</key>
 	<string>http://onecrayon.com/products/affiliatemenot/</string>
 </dict>
