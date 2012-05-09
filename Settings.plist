@@ -6,17 +6,23 @@
 		<key>Key</key>
 		<string>whitelist</string>
 		<key>Title</key>
-		<string>Whitelisted Affiliates</string>
+		<string>Affiliate tag whitelist</string>
+		<key>Titles</key>
+		<array/>
 		<key>Type</key>
-		<string>ListBox</string>
+		<string>TextField</string>
+		<key>Values</key>
+		<array>
+			<string>beckism-20</string>
+		</array>
 	</dict>
 	<dict>
 		<key>Key</key>
 		<string>blacklist</string>
 		<key>Title</key>
-		<string>Blacklisted Affiliates</string>
+		<string>Affiliate tag blacklist</string>
 		<key>Type</key>
-		<string>ListBox</string>
+		<string>TextField</string>
 	</dict>
 </array>
 </plist>

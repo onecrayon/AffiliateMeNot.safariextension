@@ -3,7 +3,83 @@
 <head>
 	<meta charset="UTF-8">
 	<title>AffiliateMeNot core logic</title>
-	<script src="global.js" type="text/javascript"></script>
+	<script type="text/javascript">
+		/**
+		 * global.js
+		 * 
+		 * Provides the core logic for intercepting Amazon Affiliate links
+		 */
+		
+		// Global array for tracking passthroughs
+		var passthrough = [];
+		
+		// Adds listener event for the tab to intercept Amazon affiliate loading
+		var setupTabListeners = function(event) {
+			var tab = event.target;
+			// Ensure we are working with a tab, not a window (only windows have a tabs array property)
+			if (typeof tab.tabs === 'undefined') {
+				tab.addEventListener("beforeNavigate", interceptAffiliateLinks, false);
+			}
+		};
+		
+		// Remove listener when tab closes
+		var cleanupTabListeners = function(event) {
+			var tab = event.target;
+			// Ensure that we are working with a tab, not a window
+			if (typeof tab.tabs === 'undefined') {
+				tab.removeEventListener("beforeNavigate", interceptAffiliateLinks, false);
+			}
+		};
+		
+		// Checks to see if we are visiting an affiliate link; the core of our extension
+		var affRE = /^http:\/\/(?:|.+?\.)amazon\..+?(?:\?|&)tag=([a-z0-9_-]+).*?$/i;
+		var interceptAffiliateLinks = function(event) {
+			// If URL is in the passthrough array, just send it along
+			var index = passthrough.indexOf(event.url);
+			if (index >= 0) {
+				// Remove from our passthrough array, but otherwise just let things occur normally
+				passthrough.splice(index, 1);
+			} else {
+				// Check to see if we have a tag
+				var results = affRE.exec(event.url);
+				if (results !== null) {
+					// Check if this tag is in either the blacklist or whitelist
+					var whitelist = (safari.extension.settings.whitelist ? safari.extension.settings.whitelist.split(/,?\s+/) : []);
+					var blacklist = (safari.extension.settings.blacklist ? safari.extension.settings.blacklist.split(/,?\s+/) : []);
+					if (whitelist.indexOf(results[1]) >= 0) {
+						// Exit the event action and let things proceed normally since the tag is whitelisted
+						return;
+					} else if (blacklist.indexOf(results[1]) >= 0) {
+						// Strip the tag out and visit that URL instead, since the tag is blacklisted
+						event.preventDefault();
+						// `this` refers to the tab, which is what the listener is attached to
+						this.url = event.url.replace(/&tag=[a-z0-9_-]+/ig, '').replace(/tag=[a-z0-9_-]+/ig, '').replace(/\?$/, '');
+					} else {
+						// Show our interim page and let the user choose what to do
+						event.preventDefault();
+						this.url = safari.extension.baseURI + 'affiliatemenot.html?url=' + encodeURIComponent(event.url) + '&tag=' + encodeURIComponent(results[1]);
+					}
+				}
+			}
+		};
+		
+		var manageSettings = function(event) {
+			if (event.name === 'AMNWhitelistTag') {
+				var whitelist = safari.extension.settings.getItem('whitelist');
+				safari.extension.settings.setItem('whitelist', (whitelist && whitelist.length > 0 ? whitelist + ', ' : '') + event.message);
+			} else if (event.name === 'AMNBlacklistTag') {
+				var blacklist = safari.extension.settings.getItem('blacklist');
+				safari.extension.settings.setItem('blacklist', (blacklist && blacklist.length > 0 ? blacklist + ', ' : '') + event.message);
+			} else if (event.name === 'AMNPassthroughURL') {
+				passthrough.push(event.message);
+			}
+		};
+		
+		// Start listening to our open, close, and message events
+		safari.application.addEventListener("open", setupTabListeners, true);
+		safari.application.addEventListener("close", cleanupTabListeners, true);
+		safari.application.addEventListener("message", manageSettings, false);
+	</script>
 </head>
 <body></body>
 </html>

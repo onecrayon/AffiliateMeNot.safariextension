@@ -40,18 +40,18 @@
 			-webkit-box-flex: 1;
 		}
 		
-		#affilateID {
+		#affiliateID {
 			display: inline-block;
 			font-size: 3em;
 			color: #000;
 		}
 		
-		#affilateID:before {
+		#affiliateID:before {
 			content: "— ";
 			color: #e1e1e1;
 		}
 		
-		#affilateID:after {
+		#affiliateID:after {
 			content: " —";
 			color: #e1e1e1;
 		}
@@ -96,7 +96,7 @@
 	<div id="page">
 		<p>You are trying to visit Amazon with this affiliate ID:</p>
 		
-		<p id="affilateID">beckism-20</p>
+		<p id="affiliateID">beckism-20</p>
 		
 		<p class="links">
 			<a id="keepLink" href="#"><strong>Keep</strong> affiliate link</a>
@@ -119,8 +119,8 @@
 		// Grab our original URL and target tag
 		var originalURL = params['url'];
 		var tag = params['tag'];
-		// Parse the clean URL (run it twice in case tag immediately follows question mark)
-		var cleanURL = originalURL.replace(/&tag=[a-z0-9_-]+/i, '').replace(/tag=[a-z0-9_-]+/i, '');
+		// Parse the clean URL (run it twice in case tag immediately follows question mark, then strip trailing question marks if they exist)
+		var cleanURL = originalURL.replace(/&tag=[a-z0-9_-]+/i, '').replace(/tag=[a-z0-9_-]+/i, '').replace(/\?$/, '');
 		
 		// Our function for saving info to white- or black-list and redirecting
 		var saveDefaultsAndRedirect = function(event) {
@@ -135,6 +135,17 @@
 					safari.self.tab.dispatchMessage("AMNBlacklistTag", tag);
 				}
 			}
+			
+			// If our URL is going to include the tag, tell the global page to pass it through this once
+			if (this.id === 'keepLink') {
+				safari.self.tab.dispatchMessage("AMNPassthroughURL", this.href);
+			}
+			
+			// Redirect to the URL
+			window.location = this.href;
+			
+			// Prevent the default action
+			return false;
 		};
 		
 		// Set the appropriate affiliate tag in the page
