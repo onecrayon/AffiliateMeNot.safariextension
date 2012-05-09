@@ -1,0 +1,154 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<title>Affiliate Me Not: visit affiliate link?</title>
+	
+	<style>
+		body, html {
+			background: #f5f5f5;
+			text-align: center;
+			font: 100%/1.25 Futura, "Helvetica Neue", Helvetica, sans-serif;
+			color: #333;
+			margin: 0;
+			padding: 0;
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-box-pack: center;
+			height: 100%;
+		}
+		
+		
+		p {
+			font-size: 1.5em;
+			margin: 0 0 24px;
+			padding: 0;
+		}
+		
+		label {
+			font-size: 1.25em;
+		}
+		
+		#page {
+			-webkit-box-flex: 3;
+			display: -webkit-box;
+			-webkit-box-orient: vertical;
+			-webkit-box-pack: center;
+		}
+		
+		#bumper {
+			-webkit-box-flex: 1;
+		}
+		
+		#affilateID {
+			display: inline-block;
+			font-size: 3em;
+			color: #000;
+		}
+		
+		#affilateID:before {
+			content: "— ";
+			color: #e1e1e1;
+		}
+		
+		#affilateID:after {
+			content: " —";
+			color: #e1e1e1;
+		}
+		
+		.links {
+			font-size: 2.25em;
+			margin-bottom: 36px;
+		}
+		
+		.links a {
+			display: inline-block;
+			margin: 0 25px;
+			text-decoration: none;
+			color: #7abbe6;
+			background-color: #f5f5f5;
+			border-bottom: 6px solid #f5f5f5;
+			border-top-left-radius: 5px;
+			border-top-right-radius: 5px;
+			padding: 10px 20px;
+			
+			-webkit-transition: background-color .20s ease-in-out 0s, border-color .20s ease-in-out 0s;
+		}
+		
+		.links a:hover {
+			background-color: #fff;
+			border-color: #e1e1e1;
+		}
+		
+		.links strong {
+			display: block;
+			font-size: 1.125em;
+			color: #288fd2;
+			font-weight: normal;
+		}
+		
+		#affiliateIDInline {
+			color: #000;
+		}
+	</style>
+</head>
+<body>
+	<div id="page">
+		<p>You are trying to visit Amazon with this affiliate ID:</p>
+		
+		<p id="affilateID">beckism-20</p>
+		
+		<p class="links">
+			<a id="keepLink" href="#"><strong>Keep</strong> affiliate link</a>
+			
+			<a id="stripLink" href="#"><strong>Strip</strong> affiliate link</a>
+		</p>
+		
+		<form>
+			<label><input id="defaultCheckbox" type="checkbox" name="defaultToAction" /> Always use this action for <span id="affiliateIDInline">beckism-20</span></label>
+		</form>
+	</div>
+	<div id="bumper"></div>
+	<script type="text/javascript">
+		// Parse through our query string and separate it into an object
+		var params = {}, queryString = location.search.substring(1), queryRE = /([^&=]+)=([^&]*)/g, match;
+		while (match = queryRE.exec(queryString)) {
+			params[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
+		}
+		
+		// Grab our original URL and target tag
+		var originalURL = params['url'];
+		var tag = params['tag'];
+		// Parse the clean URL (run it twice in case tag immediately follows question mark)
+		var cleanURL = originalURL.replace(/&tag=[a-z0-9_-]+/i, '').replace(/tag=[a-z0-9_-]+/i, '');
+		
+		// Our function for saving info to white- or black-list and redirecting
+		var saveDefaultsAndRedirect = function(event) {
+			var defaultsCheck = document.getElementById('defaultCheckbox');
+			if (defaultsCheck.checked) {
+				// They want to white- or black-list this page
+				if (this.id === 'keepLink') {
+					// Whitelist the tag
+					safari.self.tab.dispatchMessage("AMNWhitelistTag", tag);
+				} else {
+					// Blacklist the tag
+					safari.self.tab.dispatchMessage("AMNBlacklistTag", tag);
+				}
+			}
+		};
+		
+		// Set the appropriate affiliate tag in the page
+		document.getElementById('affiliateID').innerText = tag;
+		document.getElementById('affiliateIDInline').innerText = tag;
+		// Grab references to our links
+		var keepLink = document.getElementById('keepLink');
+		var stripLink = document.getElementById('stripLink');
+		// Set URLs for our links for better status bar experience
+		keepLink.href = originalURL;
+		stripLink.href = cleanURL;
+		// Setup our event listeners for links to handle white- and black-listing
+		keepLink.addEventListener('click', saveDefaultsAndRedirect, false);
+		stripLink.addEventListener('click', saveDefaultsAndRedirect, false);
+	</script>
+</body>
+</html>

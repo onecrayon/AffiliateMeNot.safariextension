@@ -4,7 +4,7 @@
 <array>
 	<dict>
 		<key>Key</key>
-		<string>aff-whitelist</string>
+		<string>whitelist</string>
 		<key>Title</key>
 		<string>Whitelisted Affiliates</string>
 		<key>Type</key>
@@ -12,7 +12,7 @@
 	</dict>
 	<dict>
 		<key>Key</key>
-		<string>aff-blacklist</string>
+		<string>blacklist</string>
 		<key>Title</key>
 		<string>Blacklisted Affiliates</string>
 		<key>Type</key>

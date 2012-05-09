@@ -32,6 +32,15 @@ var interceptAffiliateLinks = function(event) {
 	}
 };
 
-// Start listening to our open and close events
+var manageSettings = function(event) {
+	if (event.name === 'AMNWhitelistTag') {
+		safari.extension.settings.whitelist.push(tag);
+	} else if (event.name === 'AMNBlacklistTag') {
+		safari.extension.settings.blacklist.push(tag);
+	}
+};
+
+// Start listening to our open, close, and message events
 safari.application.addEventListener("open", setupTabListeners, true);
 safari.application.addEventListener("close", cleanupTabListeners, true);
+safari.application.addEventListener("message", manageSettings, false);
